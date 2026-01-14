@@ -1,6 +1,10 @@
 import json
 import queue
 from datetime import datetime
+import re
+
+# Regex to strip ANSI escape sequences
+ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -433,8 +437,9 @@ class MeshtasticGUI:
         self._maybe_add_message_row(packet)
 
     def _on_ui_log_line(self, line: str):
-        # raw radio/router logs straight from the COM port
-        self._append_log(f"[LOG] {line}")
+        # raw radio/router logs straight from the COM port; strip ANSI codes
+        clean_line = ANSI_ESCAPE_RE.sub("", line)
+        self._append_log(f"[LOG] {clean_line}")
 
     def _append_log(self, text: str):
         ts = datetime.now().strftime("%H:%M:%S")
